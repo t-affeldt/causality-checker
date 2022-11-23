@@ -21,7 +21,6 @@ def generate_indices():
     df = pd.read_csv('dummy_data.csv', index_col = False)
 
     meta = pd.DataFrame(dict(zip(CLUSTER_NAMES, [[]] * cluster_count)))
-    print(meta)
 
     for col in df.columns:
         print('processing column ' + col)
