@@ -35,22 +35,42 @@ def match(cause_index, effect_index, *ctx_indices):
         'contexts_base': [0] * len(files['contexts']) # |E INTERSECT C|
     }
 
-    while(lines['cause'] < math.inf):
-        counter['cause'] += 1
+    while lines['cause'] < math.inf and lines['effect'] < math.inf:
         # find matching (or higher) effect index
-        while(lines['effect'] < lines['cause']):
+
+        # TODO: refactor
+        for i in range(0, len(lines['contexts'])):
+            while lines['contexts'][i] < lines['cause'] and lines['contexts'][i] < lines['effect']:
+                lines['contexts'][i] = next_entry(files['contexts'][i])
+                if lines['contexts'][i] == lines['effect'] and lines['effect'] < math.inf:
+                    # found intersection of effect E and context C
+                    counter['contexts_base'][i] += 1
+
+        while lines['effect'] < lines['cause']:
             lines['effect'] = next_entry(files['effect'])
 
             # iterate through given contexts to match against E
             if lines['effect'] == math.inf:
                 break
+            # TODO: refactor
             for i in range(0, len(lines['contexts'])):
                 while lines['contexts'][i] < lines['cause'] and lines['contexts'][i] < lines['effect']:
                     lines['contexts'][i] = next_entry(files['contexts'][i])
                 if lines['contexts'][i] == lines['effect']:
                     # found intersection of effect E and context C
                     counter['contexts_base'][i] += 1
+        if lines['cause'] == math.inf:
+            continue
 
+        # TODO: refactor
+        for i in range(0, len(lines['contexts'])):
+            while lines['contexts'][i] < lines['cause']:
+                lines['contexts'][i] = next_entry(files['contexts'][i])
+                if lines['contexts'][i] == lines['effect'] and lines['effect'] < math.inf:
+                    # found intersection of effect E and context C
+                    counter['contexts_base'][i] += 1
+
+        counter['cause'] += 1
         has_effect = (lines['effect'] == lines['cause'])
         if has_effect:
             # found intersection of cause F and effect E
@@ -58,8 +78,6 @@ def match(cause_index, effect_index, *ctx_indices):
 
         # iterate through given contexts to match against F
         for i in range(0, len(lines['contexts'])):
-            while lines['contexts'][i] < lines['cause']:
-                lines['contexts'][i] = next_entry(files['contexts'][i])
             if lines['contexts'][i] == lines['cause']:
                 # found intersection of cause F and context C
                 counter['contexts'][i] += 1
@@ -104,6 +122,7 @@ def wcaLift(cause, effect, *contexts):
         n_ctx_total = total_context_entries - p_ctx_total # |C UNION -C| - |C|
         n_caLift = caLift(n_total, n_pos, n_ctx_base, n_ctx_total)
         n_weight = weight = n_total / counter['cause']
+        print(n_ctx_base, p_ctx_base)
 
         results[i] = p_weight * p_caLift + n_weight * n_caLift
 
@@ -113,4 +132,4 @@ def wcaLift(cause, effect, *contexts):
 #correlation(ARG1, ARG2)
 #aLift(ARG1, 'upper', ARG2, 'upper')
 #print(match('normaldist_lower', 'normaldist1_upper', 'pin_upper', 'numberrange1_upper'))
-print(wcaLift(ARG1 + '_upper', ARG2 + '_upper', 'pin_lower'))
+print(wcaLift(ARG1 + '_upper', ARG2 + '_upper', 'pin_upper', 'pin_lower'))
