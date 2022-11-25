@@ -19,10 +19,18 @@ def clean_folder():
         for d in dirs:
             shutil.rmtree(os.path.join(root, d))
 
-def generate_indices():
+def get_tables():
+    for root, dirs, files in os.walk('./tables'):
+        for f in files:
+            if f.endswith('.csv'):
+                yield f[:-4]
+
+def generate_indices(tablename):
     cluster_count = len(CLUSTER_NAMES)
-    print('Reading table')
-    df = pd.read_csv('dummy_data.csv', index_col = False)
+    print('Reading table', tablename)
+    filepath = os.path.join(os.path.abspath('./tables'), tablename + '.csv')
+    os.mkdir(os.path.abspath('./indices/' + tablename))
+    df = pd.read_csv(filepath, index_col = False)
 
     meta = pd.DataFrame(dict(zip(CLUSTER_NAMES, [[]] * cluster_count)))
 
@@ -39,7 +47,7 @@ def generate_indices():
             for i in range(0, cluster_count):
                 selection = s[s == i]
                 counter[i] = selection.size
-                selection.to_csv('indices/' + col + '_' + CLUSTER_NAMES[i] +'.txt', columns = [], header = False)
+                selection.to_csv('indices/' + tablename + '/' + col + '_' + CLUSTER_NAMES[i] +'.txt', columns = [], header = False)
             meta.loc[col] = counter
         else:
             # categorize textual attributes
@@ -51,12 +59,16 @@ def generate_indices():
                 continue
             for value in values:
                 formatted = value.replace(' ', '_')
-                df.loc[df[col] == value].to_csv('indices/' + col + '_' + formatted + '.txt', columns = [], header = False)
+                df.loc[df[col] == value].to_csv('indices/' + tablename + '/' + col + '_' + formatted + '.txt', columns = [], header = False)
 
-    meta.to_csv('indices/_meta.csv', index_label = 'column')
+    meta.to_csv('indices/' + tablename + '/_meta.csv', index_label = 'column')
 
     print('Finished processing')
 
 
+if not os.path.exists('./indices'):
+   os.mkdir('./indices')
 clean_folder()
-generate_indices()
+
+for table in get_tables():
+    generate_indices(table)

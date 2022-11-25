@@ -1,10 +1,11 @@
 import pandas as pd
 import math
 
+TABLENAME = "dummy_data"
 ARG1 = "normaldist"
 ARG2 = "normaldist1"
 
-meta = pd.read_csv('indices/_meta.csv', index_col = 'column')
+meta = pd.read_csv('indices/' + TABLENAME + '/_meta.csv', index_col = 'column')
 
 def match(cause_index, effect_index, *ctx_indices):
 
@@ -15,9 +16,9 @@ def match(cause_index, effect_index, *ctx_indices):
         return int(line)
 
     files = {
-        'cause': open('indices/' + cause_index + '.txt', 'r'),
-        'effect': open('indices/' + effect_index + '.txt', 'r'),
-        'contexts': list(map(lambda index: open('indices/' + index + '.txt', 'r'), ctx_indices))
+        'cause': open('indices/' + TABLENAME + '/' + cause_index + '.txt', 'r'),
+        'effect': open('indices/' + TABLENAME + '/' + effect_index + '.txt', 'r'),
+        'contexts': list(map(lambda index: open('indices/' + TABLENAME + '/' + index + '.txt', 'r'), ctx_indices))
     }
 
     lines = {
