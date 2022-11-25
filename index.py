@@ -5,11 +5,13 @@ import pandas as pd
 import numpy as np
 import kmeans1d
 
+# for numerical attributes
 # ordered by increasing values of clusters
 # number of cluster names determines cluster count
 CLUSTER_NAMES = [ 'lower', 'upper' ]
 
-# skip indexing text columns with too many unique values
+# for categorical text attributes
+# skip indexing columns with too many unique values
 MAX_UNIQUE = 5
 
 def clean_folder():
